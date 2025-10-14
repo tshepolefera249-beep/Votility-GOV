@@ -15,3 +15,16 @@ export async function castVote(userId: string, electionId: string, candidateId: 
     createdAt: Timestamp.now(),
   });
 }
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import NetInfo from '@react-native-community/netinfo';
+
+export async function queueVoteOffline(vote) {
+  const state = await NetInfo.fetch();
+  if (!state.isConnected) {
+    const pending = JSON.parse(await AsyncStorage.getItem('pendingVotes') || '[]');
+    pending.push(vote);
+    await AsyncStorage.setItem('pendingVotes', JSON.stringify(pending));
+  } else {
+    await castVote(vote.userId, vote.electionId, vote.candidateId);
+  }
+}
