@@ -1,0 +1,7 @@
+useEffect(() => {
+  const unsub = onSnapshot(collection(db, 'votes'), (snap) => {
+    const data = snap.docs.map(doc => doc.data());
+    setVotes(data);
+  });
+  return unsub;
+}, []);
