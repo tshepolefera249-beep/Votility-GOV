@@ -13,3 +13,17 @@ export async function checkAdminPermission(uid: string, requiredRole: string) {
   const hierarchy = ['none', 'manager', 'regional', 'superadmin'];
   return hierarchy.indexOf(role) >= hierarchy.indexOf(requiredRole);
 }
+import { db } from '@/firebaseConfig';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
+
+export async function assignAdminRole(userId: string, role: string) {
+  const userRef = doc(db, 'users', userId);
+  await updateDoc(userRef, { role });
+}
+
+export async function checkAdminRole(userId: string, role: string) {
+  const userRef = doc(db, 'users', userId);
+  const snap = await getDoc(userRef);
+  if (!snap.exists()) return false;
+  return snap.data()?.role === role;
+}
