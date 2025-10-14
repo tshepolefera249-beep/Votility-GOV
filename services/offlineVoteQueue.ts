@@ -19,3 +19,21 @@ export async function flushQueue() {
   }
   await AsyncStorage.removeItem(QUEUE_KEY);
 }
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { submitVote } from './voteSubmission';
+
+const QUEUE_KEY = 'offlineVoteQueue';
+
+export async function enqueueOfflineVote(vote: any) {
+  const existing = JSON.parse(await AsyncStorage.getItem(QUEUE_KEY) || '[]');
+  existing.push(vote);
+  await AsyncStorage.setItem(QUEUE_KEY, JSON.stringify(existing));
+}
+
+export async function syncOfflineVotes(encryptionKey: string) {
+  const queue = JSON.parse(await AsyncStorage.getItem(QUEUE_KEY) || '[]');
+  for (const vote of queue) {
+    await submitVote(vote.userId, vote.electionId, vote.candidateId, encryptionKey);
+  }
+  await AsyncStorage.removeItem(QUEUE_KEY);
+}
