@@ -23,3 +23,14 @@ export async function detectMultipleDevices(userId: string, deviceId: string) {
   const snap = await getDocs(q);
   return snap.docs.some(d => d.data().deviceId && d.data().deviceId !== deviceId);
 }
+import { db } from '@/firebaseConfig';
+import { collection, query, where, getDocs } from 'firebase/firestore';
+import { getDeviceFingerprint } from './deviceFingerprint';
+
+export async function detectMultipleDevices(userId: string) {
+  const fingerprint = getDeviceFingerprint();
+  const q = query(collection(db, 'sessions'), where('userId', '==', userId));
+  const snap = await getDocs(q);
+  const devices = snap.docs.map(d => d.data().deviceId);
+  return !devices.includes(fingerprint);
+}
