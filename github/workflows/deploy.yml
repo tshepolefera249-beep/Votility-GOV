@@ -18,3 +18,33 @@ jobs:
         run: npx expo export
       - name: Deploy
         run: echo "🚀 Deploy step here (Expo EAS, Firebase Hosting, etc.)"
+name: Expo CI/CD
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+      - name: Install Dependencies
+        run: npm install
+      - name: Run Tests
+        run: npm test
+      - name: Build Expo App
+        uses: expo/expo-github-action@v7
+        with:
+          expo-version: latest
+          expo-token: ${{ secrets.EXPO_TOKEN }}
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: expo-build
+          path: ./dist
