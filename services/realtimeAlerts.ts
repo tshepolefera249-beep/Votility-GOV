@@ -13,3 +13,14 @@ export function subscribeElectionAlerts(userToken: string) {
   });
   return unsubscribe;
 }
+import { db } from '@/firebaseConfig';
+import { collection, onSnapshot } from 'firebase/firestore';
+
+export function subscribeToCriticalEvents(callback: (event: any) => void) {
+  const criticalRef = collection(db, 'systemAlerts');
+  return onSnapshot(criticalRef, snapshot => {
+    snapshot.docChanges().forEach(change => {
+      if(change.type === 'added') callback(change.doc.data());
+    });
+  });
+}
