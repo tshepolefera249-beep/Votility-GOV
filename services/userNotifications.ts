@@ -7,3 +7,11 @@ export async function sendThemedNotification(title: string, message: string, tok
   const themedMessage = dark ? `Dark Mode: ${message}` : message;
   await sendNotification(themedTitle, themedMessage, token);
 }
+import * as Notifications from 'expo-notifications';
+
+export async function sendThemedNotification(title: string, body: string, token: string) {
+  await Notifications.scheduleNotificationAsync({
+    content: { title, body, sound: 'default' },
+    trigger: null
+  });
+}
