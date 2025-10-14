@@ -40,6 +40,27 @@ export async function castVoteWithConfirmation(userId: string, electionId: strin
 
   const encryptedVote = await Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA256, candidateId);
   await setDoc(voteRef, { userId, electionId, vote: encryptedVote, createdAt: Timestamp.now() });
+import { db } from '@/firebaseConfig';
+import { doc, getDoc, setDoc, Timestamp } from 'firebase/firestore';
+import { encryptVote } from './encryption';
+import { queuePendingVote } from './offlineQueue';
+
+export async function castVote(userId: string, electionId: string, candidateId: string, encryptionKey: string) {
+  const voteRef = doc(db, 'votes', `${userId}_${electionId}`);
+  const existing = await getDoc(voteRef);
+  if (existing.exists()) throw new Error('You already voted!');
+
+  const encrypted = encryptVote(candidateId, encryptionKey);
+
+  try {
+    await setDoc(voteRef, { userId, electionId, vote: encrypted, createdAt: Timestamp.now() });
+    return 'Vote successfully submitted!';
+  } catch {
+    // If offline, queue vote
+    await queuePendingVote({ userId, electionId, vote: candidateId });
+    return 'Vote queued, will sync when online.';
+  }
+}
 
   // Save receipt locally
   await AsyncStorage.setItem(`voteReceipt_${electionId}`, JSON.stringify({ candidateId, timestamp: new Date().toISOString() }));
