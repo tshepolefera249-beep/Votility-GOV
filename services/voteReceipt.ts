@@ -14,3 +14,13 @@ export async function verifyVoteReceipt(electionId: string, voteData: any) {
   const newHash = await Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA256, json);
   return storedHash === newHash;
 }
+import CryptoJS from 'crypto-js';
+
+export function generateVoteReceipt(userId: string, electionId: string, candidateId: string) {
+  const raw = `${userId}-${electionId}-${candidateId}-${Date.now()}`;
+  return CryptoJS.SHA256(raw).toString();
+}
+
+export function verifyVoteReceipt(receipt: string, knownHashes: string[]) {
+  return knownHashes.includes(receipt);
+}
