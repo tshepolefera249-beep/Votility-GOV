@@ -1,0 +1,20 @@
+name: Deploy to Expo on push
+on:
+  push:
+    branches:
+      - main
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install deps
+        run: npm install
+      - name: Build app
+        run: npx expo export
+      - name: Deploy
+        run: echo "🚀 Deploy step here (Expo EAS, Firebase Hosting, etc.)"
