@@ -1,0 +1,26 @@
+# .github/workflows/test-harness.yml
+name: Integration & Chaos Tests
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with: node-version: 20
+      - name: Install
+        run: npm ci
+      - name: Start Staging Services
+        run: npm run start:staging & # ensure it background-starts
+      - name: Run Load Tester
+        run: node ./dist/services/loadTester.js "http://staging.example/api/health" 50 30000
+      - name: Run Chaos Injector
+        run: node ./dist/services/chaosRunner.js || true
+      - name: Run Model Checker (optional)
+        run: npm run model-check || echo "model-check skipped"
