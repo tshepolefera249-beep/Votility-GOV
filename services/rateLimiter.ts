@@ -18,3 +18,21 @@ export async function canVote(): Promise<boolean> {
   await AsyncStorage.setItem(RATE_LIMIT_KEY, JSON.stringify(timestamps));
   return true;
 }
+const voteCounts: Record<string, {count:number, timestamp:number}> = {};
+
+export function canVote(userId: string, limit = 1, windowMs = 60000) {
+  const now = Date.now();
+  if(!voteCounts[userId]) voteCounts[userId] = {count: 0, timestamp: now};
+  
+  const userData = voteCounts[userId];
+  if(now - userData.timestamp > windowMs) {
+    userData.count = 0;
+    userData.timestamp = now;
+  }
+  
+  if(userData.count < limit) {
+    userData.count++;
+    return true;
+  }
+  return false;
+}
