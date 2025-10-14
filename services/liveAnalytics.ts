@@ -13,3 +13,14 @@ export function subscribeToLiveVotes(electionId: string, callback: (stats: any) 
     callback({ totalVotes, stats });
   });
 }
+import { db } from '@/firebaseConfig';
+import { collection, query, onSnapshot } from 'firebase/firestore';
+
+export function subscribeToLiveVotes(callback: (votes: any[]) => void) {
+  const votesRef = collection(db, 'votes');
+  const q = query(votesRef);
+  return onSnapshot(q, snapshot => {
+    const data = snapshot.docs.map(doc => doc.data());
+    callback(data);
+  });
+}
