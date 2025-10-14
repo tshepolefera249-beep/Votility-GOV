@@ -1,16 +1,22 @@
-import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import * as LocalAuthentication from 'expo-local-authentication';
+import { GoogleAuthProvider, signInWithCredential, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth, db } from '@/firebaseConfig';
+import { doc, setDoc } from 'firebase/firestore';
 
-const firebaseConfig = {
-  apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_SENDER_ID,
-  appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
-};
+export async function registerUser(email: string, password: string) {
+  const res = await createUserWithEmailAndPassword(auth, email, password);
+  await setDoc(doc(db, 'users', res.user.uid), { email });
+}
 
-const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export const db = getFirestore(app);
+export async function loginWithGoogle(idToken: string) {
+  const credential = GoogleAuthProvider.credential(idToken);
+  return signInWithCredential(auth, credential);
+}
+
+export async function biometricAuth() {
+  const compatible = await LocalAuthentication.hasHardwareAsync();
+  if (!compatible) throw new Error('No biometrics available');
+  const result = await LocalAuthentication.authenticateAsync();
+  return result.success;
+}
+
