@@ -18,3 +18,8 @@ export async function getLeaderboard(electionId: string) {
 
   return leaderboard;
 }
+export function generateLeaderboard(votes: Record<string, number>) {
+  return Object.entries(votes)
+    .sort(([, a], [, b]) => b - a)
+    .map(([candidate, count], index) => ({ rank: index + 1, candidate, count }));
+}
