@@ -5,3 +5,15 @@ useEffect(() => {
   });
   return unsub;
 }, []);
+// /screens/AdminLiveMonitor.tsx
+useEffect(() => {
+  const unsub = onSnapshot(collection(db, 'votes'), snap => {
+    const liveStats = snap.docs.reduce((acc, doc) => {
+      const vote = doc.data().vote;
+      acc[vote] = (acc[vote] || 0) + 1;
+      return acc;
+    }, {});
+    setLiveStats(liveStats);
+  });
+  return unsub;
+}, []);
